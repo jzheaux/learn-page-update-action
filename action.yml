@@ -1,0 +1,31 @@
+name: 'Releases API Sync Action'
+description: 'Syncs project releases with those listed on api.spring.io'
+author: 'Spring Security'
+
+branding:
+  icon: 'refresh-cw'
+  color: 'green'
+
+inputs:
+  token:
+    description: 'GitHub token for authentication'
+    required: true
+  api-url:
+    description: 'Spring API URL'
+    required: false
+    default: 'https://api.spring.io'
+  project-id:
+    description: 'Spring project ID (e.g., spring-security)'
+    required: true
+  gradle-properties-path:
+    description: 'Path to gradle.properties file'
+    required: false
+    default: 'gradle.properties'
+
+outputs:
+  synced-versions:
+    description: 'List of versions that were synced'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

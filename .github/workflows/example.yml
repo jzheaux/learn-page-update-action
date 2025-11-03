@@ -1,0 +1,25 @@
+name: Example - Sync Releases
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gradle.properties'
+  workflow_dispatch:
+
+jobs:
+  sync-releases:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync releases with Spring API
+        uses: jzheaux/releases-api-sync-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project-id: 'spring-security'
+          api-url: 'https://api.spring.io'
+          gradle-properties-path: 'gradle.properties'

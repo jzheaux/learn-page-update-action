@@ -1,0 +1,49 @@
+{
+  "name": "releases-api-sync-action",
+  "description": "A GitHub action for syncing a project's releases with those listed on spring.io",
+  "version": "1.0.0",
+  "author": "Spring Security",
+  "type": "module",
+  "private": true,
+  "homepage": "https://github.com/jzheaux/releases-api-sync-action#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jzheaux/releases-api-sync-action.git"
+  },
+  "keywords": [
+    "actions",
+    "spring",
+    "releases"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "bundle": "npm run format:write && npm run package",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "package": "npx ncc build src/index.js -o dist --source-map --license licenses.txt",
+    "package:watch": "npm run package -- --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "all": "npm run format:write && npm run lint && npm run test && npm run package"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "@actions/exec": "^1.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jest": "^28.9.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "jest": "^30.2.0",
+    "prettier": "^3.3.3"
+  }
+}
