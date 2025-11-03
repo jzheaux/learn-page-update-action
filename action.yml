@@ -14,6 +14,9 @@ inputs:
     description: 'Spring API URL'
     required: false
     default: 'https://api.spring.io'
+  api-token:
+    description: 'Optional API token for authenticating with the Spring API'
+    required: false
   project-id:
     description: 'Spring project ID (e.g., spring-security)'
     required: true

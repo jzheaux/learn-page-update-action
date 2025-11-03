@@ -68,8 +68,16 @@ export function calculateVersions(version) {
  * @param {string} version - Version to sync
  * @param {string} status - Release status (SNAPSHOT, GENERAL_AVAILABILITY, etc.)
  * @param {boolean} current - Whether this is the current version
+ * @param {string} apiToken - Optional API token for authentication
  */
-export async function syncReleaseWithApi(apiUrl, projectId, version, status, current = false) {
+export async function syncReleaseWithApi(
+  apiUrl,
+  projectId,
+  version,
+  status,
+  current = false,
+  apiToken = null
+) {
   core.info(`Syncing release: ${version} with status ${status}`)
 
   const releaseData = {
@@ -81,11 +89,17 @@ export async function syncReleaseWithApi(apiUrl, projectId, version, status, cur
   }
 
   try {
+    const headers = {
+      'Content-Type': 'application/json'
+    }
+
+    if (apiToken) {
+      headers['Authorization'] = `Bearer ${apiToken}`
+    }
+
     const response = await fetch(`${apiUrl}/projects/${projectId}/releases`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       body: JSON.stringify(releaseData)
     })
 
@@ -163,6 +177,7 @@ export async function run() {
     const projectId = core.getInput('project-id', { required: true })
     const gradlePropertiesPath =
       core.getInput('gradle-properties-path', { required: false }) || 'gradle.properties'
+    const apiToken = core.getInput('api-token', { required: false }) || null
 
     core.info(`Starting release sync for project: ${projectId}`)
 
@@ -179,10 +194,31 @@ export async function run() {
     core.info(`  Next Snapshot: ${versions.nextSnapshot}`)
 
     // Sync releases with API
-    await syncReleaseWithApi(apiUrl, projectId, versions.previous, 'GENERAL_AVAILABILITY', false)
-    await syncReleaseWithApi(apiUrl, projectId, versions.currentSnapshot, 'SNAPSHOT', false)
-    await syncReleaseWithApi(apiUrl, projectId, versions.current, 'GENERAL_AVAILABILITY', true)
-    await syncReleaseWithApi(apiUrl, projectId, versions.nextSnapshot, 'SNAPSHOT', false)
+    await syncReleaseWithApi(
+      apiUrl,
+      projectId,
+      versions.previous,
+      'GENERAL_AVAILABILITY',
+      false,
+      apiToken
+    )
+    await syncReleaseWithApi(
+      apiUrl,
+      projectId,
+      versions.currentSnapshot,
+      'SNAPSHOT',
+      false,
+      apiToken
+    )
+    await syncReleaseWithApi(
+      apiUrl,
+      projectId,
+      versions.current,
+      'GENERAL_AVAILABILITY',
+      true,
+      apiToken
+    )
+    await syncReleaseWithApi(apiUrl, projectId, versions.nextSnapshot, 'SNAPSHOT', false, apiToken)
 
     // Sync branches
     const { owner, repo } = github.context.repo

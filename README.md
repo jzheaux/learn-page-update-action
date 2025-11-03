@@ -83,6 +83,12 @@ And create/update branches:
 - 6.5.4
 - 6.5.5-SNAPSHOT
 
+**Note:** For versions with patch 0 (e.g., 6.5.0), the previous version will be the same (6.5.0) as there is no prior patch release in that minor version series.
+
+### `api-token` (optional)
+
+Optional API token for authenticating with the Spring API. If provided, it will be sent as a Bearer token in the Authorization header.
+
 ## Development
 
 ### Prerequisites

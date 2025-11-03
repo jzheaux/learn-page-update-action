@@ -1,10 +1,12 @@
 import { describe, test, expect } from '@jest/globals'
 import { readVersionFromGradleProperties, calculateVersions } from '../src/main.js'
 import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
 
 describe('readVersionFromGradleProperties', () => {
   test('reads version from valid gradle.properties', () => {
-    const testFile = '/tmp/test-gradle.properties'
+    const testFile = path.join(os.tmpdir(), 'test-gradle.properties')
     fs.writeFileSync(testFile, 'version=6.5.4\n')
 
     const version = readVersionFromGradleProperties(testFile)
@@ -14,7 +16,7 @@ describe('readVersionFromGradleProperties', () => {
   })
 
   test('reads version with spaces', () => {
-    const testFile = '/tmp/test-gradle2.properties'
+    const testFile = path.join(os.tmpdir(), 'test-gradle2.properties')
     fs.writeFileSync(testFile, 'version = 6.5.4 \n')
 
     const version = readVersionFromGradleProperties(testFile)
@@ -24,13 +26,14 @@ describe('readVersionFromGradleProperties', () => {
   })
 
   test('throws error if file not found', () => {
+    const testFile = path.join(os.tmpdir(), 'nonexistent.properties')
     expect(() => {
-      readVersionFromGradleProperties('/tmp/nonexistent.properties')
+      readVersionFromGradleProperties(testFile)
     }).toThrow('gradle.properties file not found')
   })
 
   test('throws error if version not found', () => {
-    const testFile = '/tmp/test-gradle3.properties'
+    const testFile = path.join(os.tmpdir(), 'test-gradle3.properties')
     fs.writeFileSync(testFile, 'someOtherProperty=value\n')
 
     expect(() => {
