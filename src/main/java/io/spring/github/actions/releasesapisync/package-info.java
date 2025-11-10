@@ -15,19 +15,3 @@
  */
 
 package io.spring.github.actions.releasesapisync;
-
-import org.junit.jupiter.api.Test;
-
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-
-@SpringBootTest
-@TestPropertySource(properties = { "releases.api.url=http://localhost:8080", "releases.api.token=token",
-		"releases.project.name=spring-security", "releases.project.version=6.5.4" })
-public class ReleaseApiSyncApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}

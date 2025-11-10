@@ -19,11 +19,16 @@ package io.spring.github.actions.releasesapisync.releases;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * Client interface for the Project Service API releases resource.
+ *
+ * @author Josh Cummings
+ */
 public interface ReleasesService {
 
-    Collection<FetchedRelease> getReleases();
+	Collection<FetchedRelease> getReleases();
 
-    void createRelease(Release release);
+	void createRelease(Release release);
 
 	void deleteRelease(String release);
 
@@ -33,9 +38,9 @@ public interface ReleasesService {
 
 	default void deleteReleasesByGeneration(Release release) {
 		getReleases().stream()
-				.filter(release::isSameMajorMinor)
-				.map(FetchedRelease::version)
-				.forEach(this::deleteRelease);
+			.filter(release::isSameMajorMinor)
+			.map(FetchedRelease::version)
+			.forEach(this::deleteRelease);
 	}
 
 	default void syncReleases(Release latest) {
@@ -43,29 +48,29 @@ public interface ReleasesService {
 		createReleases(latest, latest.nextSnapshot());
 	}
 
-    record FetchedRelease(String version, String referenceDocUrl, String apiDocUrl, String status, boolean current) {
-    }
+	record FetchedRelease(String version, String referenceDocUrl, String apiDocUrl, String status, boolean current) {
+	}
 
-    record Release(String version, boolean isAntora, String referenceDocUrl, String apiDocUrl) {
+	record Release(String version, boolean isAntora, String referenceDocUrl, String apiDocUrl) {
 
-        public boolean isSameMajorMinor(FetchedRelease other) {
-            String[] parts = this.version.split("[\\.\\-]");
-            String[] otherParts = other.version().split("[\\.\\-]");
-            return parts[0].equals(otherParts[0]) && parts[1].equals(otherParts[1]);
-        }
+		public boolean isSameMajorMinor(FetchedRelease other) {
+			String[] parts = this.version.split("[\\.\\-]");
+			String[] otherParts = other.version().split("[\\.\\-]");
+			return parts[0].equals(otherParts[0]) && parts[1].equals(otherParts[1]);
+		}
 
-        public Release nextSnapshot() {
-            String[] parts = this.version.split("[\\.\\-]");
-            int major = Integer.parseInt(parts[0]);
-            int minor = Integer.parseInt(parts[1]);
-            int patch = Integer.parseInt(parts[2]);
-            boolean isSnapshot = this.version.endsWith("SNAPSHOT");
-            if (!isSnapshot) {
-                patch += 1;
-            }
-            String nextVersion = major + "." + minor + "." + patch + "-SNAPSHOT";
-            return new Release(nextVersion, this.isAntora, this.referenceDocUrl, this.apiDocUrl);
-        }
-    }
+		public Release nextSnapshot() {
+			String[] parts = this.version.split("[\\.\\-]");
+			int major = Integer.parseInt(parts[0]);
+			int minor = Integer.parseInt(parts[1]);
+			int patch = Integer.parseInt(parts[2]);
+			boolean isSnapshot = this.version.endsWith("SNAPSHOT");
+			if (!isSnapshot) {
+				patch += 1;
+			}
+			String nextVersion = major + "." + minor + "." + patch + "-SNAPSHOT";
+			return new Release(nextVersion, this.isAntora, this.referenceDocUrl, this.apiDocUrl);
+		}
+	}
 
 }

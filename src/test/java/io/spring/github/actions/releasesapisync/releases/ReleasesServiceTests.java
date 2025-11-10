@@ -16,8 +16,11 @@
 
 package io.spring.github.actions.releasesapisync.releases;
 
+import java.util.List;
+
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.context.annotation.Import;
@@ -26,18 +29,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.ResponseActions;
 
-import java.util.List;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RestClientTest(properties = {
-		"releases.api.url=http://localhost:8080",
-		"releases.api.token=token",
-		"releases.project.name=spring-boot",
-		"releases.project.version=2.3.1"
-}, value = ReleasesService.class)
+@RestClientTest(properties = { "releases.api.url=http://localhost:8080", "releases.api.token=token",
+		"releases.project.name=spring-boot", "releases.project.version=2.3.1" }, value = ReleasesService.class)
 @Import(ReleaseSyncConfiguration.class)
 class ReleasesServiceTests {
 
@@ -108,8 +107,7 @@ class ReleasesServiceTests {
 
 	@Test
 	void updateWhenMultipleExistingReleasesThenReplaces() {
-		String releases = releases(ga("2.3.0"), snapshot("2.3.1-SNAPSHOT"),
-				ga("2.3.1"), snapshot("2.3.2-SNAPSHOT"));
+		String releases = releases(ga("2.3.0"), snapshot("2.3.1-SNAPSHOT"), ga("2.3.1"), snapshot("2.3.2-SNAPSHOT"));
 		get().andRespond(withSuccess(releases, MediaType.APPLICATION_JSON));
 		delete("2.3.0").andRespond(withSuccess());
 		delete("2.3.1-SNAPSHOT").andRespond(withSuccess());
@@ -129,18 +127,15 @@ class ReleasesServiceTests {
 	}
 
 	ResponseActions delete(String version) {
-		return this.server.expect(requestTo(API_BASE + "/releases/" + version))
-				.andExpect(method(HttpMethod.DELETE));
+		return this.server.expect(requestTo(API_BASE + "/releases/" + version)).andExpect(method(HttpMethod.DELETE));
 	}
 
 	String ga(String version) {
-		return RELEASE_TEMPLATE.replaceAll("\\{version}", version)
-				.replace("{status}", "GENERAL_AVAILABILITY");
+		return RELEASE_TEMPLATE.replaceAll("\\{version}", version).replace("{status}", "GENERAL_AVAILABILITY");
 	}
 
 	String snapshot(String version) {
-		return RELEASE_TEMPLATE.replaceAll("\\{version}", version)
-				.replace("{status}", "SNAPSHOT");
+		return RELEASE_TEMPLATE.replaceAll("\\{version}", version).replace("{status}", "SNAPSHOT");
 	}
 
 	String releases(String... releases) {

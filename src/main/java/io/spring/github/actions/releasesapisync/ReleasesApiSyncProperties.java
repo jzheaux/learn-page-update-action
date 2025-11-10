@@ -16,31 +16,36 @@
 
 package io.spring.github.actions.releasesapisync;
 
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
-
 /**
  * Configuration properties for the releases API sync action.
+ *
+ * @author Josh Cummings
+ * @param api the API connection details
+ * @param project the Spring project details
  */
 @ConfigurationProperties(prefix = "releases")
 public record ReleasesApiSyncProperties(@DefaultValue Api api, @DefaultValue Project project) {
 
-    public record Api(@DefaultValue("https://api.spring.io") String url, String token) {
-    }
+	public record Api(@DefaultValue("https://api.spring.io") String url, String token) {
+	}
 
-    public record Project(String name, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
-        public Release getRelease() {
-            String refdocUrl = this.refdoc.template().replace("{slug}", this.name);
-            String apidocUrl = this.apidoc.template().replace("{slug}", this.name);
-            return new Release(this.version, this.refdoc.antora, refdocUrl, apidocUrl);
-        }
-    }
+	public record Project(String name, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
+		public Release getRelease() {
+			String refdocUrl = this.refdoc.template().replace("{slug}", this.name);
+			String apidocUrl = this.apidoc.template().replace("{slug}", this.name);
+			return new Release(this.version, this.refdoc.antora, refdocUrl, apidocUrl);
+		}
+	}
 
-    record Apidoc(@DefaultValue("https://docs.spring.io/{slug}/docs/{version}/javadoc-api") String template) {
-    }
+	record Apidoc(@DefaultValue("https://docs.spring.io/{slug}/docs/{version}/javadoc-api") String template) {
+	}
 
-    record Refdoc(@DefaultValue("https://docs.spring.io/{slug}/reference/{version}/index.html") String template, @DefaultValue("true") boolean antora) {
-    }
+	record Refdoc(@DefaultValue("https://docs.spring.io/{slug}/reference/{version}/index.html") String template,
+			@DefaultValue("true") boolean antora) {
+	}
 }
