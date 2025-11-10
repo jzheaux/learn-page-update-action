@@ -16,40 +16,14 @@
 
 package io.spring.github.actions.releasesapisync;
 
-import java.util.Base64;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.support.RestClientAdapter;
-import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @SpringBootApplication
-@EnableConfigurationProperties(ReleasesApiSyncProperties.class)
 class ReleaseApiSyncApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(ReleaseApiSyncApplication.class, args);
         app.getBean(ReleaseUpdater.class).update();
-    }
-
-    @Bean
-    RestClient rest(ReleasesApiSyncProperties properties) {
-        String authString = properties.project().slug() + ":" + properties.api().token();
-        String base64Creds = Base64.getEncoder().encodeToString(authString.getBytes());
-        return RestClient.builder()
-            .baseUrl(properties.api().url())
-            .defaultHeader("Authorization", "Basic " + base64Creds)
-            .build();
-    }
-
-    @Bean
-    ReleasesService releasesService(ReleasesApiSyncProperties properties, RestClient rest) {
-        RestClientAdapter adapter = RestClientAdapter.create(rest);
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-        return factory.createClient(ReleasesService.class);
     }
 }

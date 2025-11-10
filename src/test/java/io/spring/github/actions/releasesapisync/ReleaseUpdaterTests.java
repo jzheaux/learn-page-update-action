@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import io.spring.github.actions.releasesapisync.releases.ReleasesService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -32,8 +33,8 @@ import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties.Api;
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties.Apidoc;
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties.Project;
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties.Refdoc;
-import io.spring.github.actions.releasesapisync.ReleasesService.FetchedRelease;
-import io.spring.github.actions.releasesapisync.ReleasesService.Release;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.FetchedRelease;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

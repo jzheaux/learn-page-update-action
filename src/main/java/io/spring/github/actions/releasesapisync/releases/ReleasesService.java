@@ -14,37 +14,28 @@
  * limitations under the License.
  */
 
-package io.spring.github.actions.releasesapisync;
+package io.spring.github.actions.releasesapisync.releases;
 
 import java.util.Collection;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.service.annotation.DeleteExchange;
-import org.springframework.web.service.annotation.GetExchange;
-import org.springframework.web.service.annotation.PostExchange;
+public interface ReleasesService {
+    Collection<FetchedRelease> getReleases(String project);
 
-interface ReleasesService {
-    @GetExchange("/projects/{project}/releases")
-    Collection<FetchedRelease> getReleases(@PathVariable(name="project") String project);
+    void createRelease(String project, Release release);
 
-    @PostExchange("/projects/{project}/releases")
-    void createRelease(@PathVariable(name="project") String project, @RequestBody Release release);
-
-    @DeleteExchange("/projects/{project}/releases/{release}")
-    void deleteRelease(@PathVariable(name="project") String project, @PathVariable(name="release") String release);
+    void deleteRelease(String project, String release);
 
     record FetchedRelease(String version, String referenceDocUrl, String apiDocUrl, String status, boolean current) {
     }
 
     record Release(String version, boolean isAntora, String referenceDocUrl, String apiDocUrl) {
-        boolean isSameMajorMinor(FetchedRelease other) {
+        public boolean isSameMajorMinor(FetchedRelease other) {
             String[] parts = this.version.split("[\\.\\-]");
             String[] otherParts = other.version().split("[\\.\\-]");
             return parts[0].equals(otherParts[0]) && parts[1].equals(otherParts[1]);
         }
 
-        Release nextSnapshot() {
+        public Release nextSnapshot() {
             String[] parts = this.version.split("[\\.\\-]");
             int major = Integer.parseInt(parts[0]);
             int minor = Integer.parseInt(parts[1]);
@@ -57,4 +48,5 @@ interface ReleasesService {
             return new Release(nextVersion, this.isAntora, this.referenceDocUrl, this.apiDocUrl);
         }
     }
+
 }

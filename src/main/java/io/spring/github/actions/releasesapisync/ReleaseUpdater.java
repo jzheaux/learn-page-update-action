@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import io.spring.github.actions.releasesapisync.ReleasesService.FetchedRelease;
-import io.spring.github.actions.releasesapisync.ReleasesService.Release;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.FetchedRelease;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
 
 @Component
 class ReleaseUpdater {

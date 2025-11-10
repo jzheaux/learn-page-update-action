@@ -19,19 +19,19 @@ package io.spring.github.actions.releasesapisync;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-import io.spring.github.actions.releasesapisync.ReleasesService.Release;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
 
 /**
  * Configuration properties for the releases API sync action.
  */
 @ConfigurationProperties(prefix = "releases")
-record ReleasesApiSyncProperties(@DefaultValue Api api, @DefaultValue Project project) {
+public record ReleasesApiSyncProperties(@DefaultValue Api api, @DefaultValue Project project) {
 
-    record Api(@DefaultValue("https://api.spring.io") String url, String token) {
+    public record Api(@DefaultValue("https://api.spring.io") String url, String token) {
     }
 
-    record Project(String slug, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
-        Release getRelease() {
+    public record Project(String slug, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
+        public Release getRelease() {
             String refdocUrl = this.refdoc.template().replace("{slug}", this.slug);
             String apidocUrl = this.apidoc.template().replace("{slug}", this.slug);
             return new Release(this.version, this.refdoc.antora, refdocUrl, apidocUrl);

@@ -32,4 +32,5 @@ public class ReleaseApiSyncApplicationTests {
     @Test
     void contextLoads() {
     }
+
 }
