@@ -16,14 +16,18 @@
 
 package io.spring.github.actions.releasesapisync;
 
+import io.spring.github.actions.releasesapisync.releases.ReleasesService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
+@EnableConfigurationProperties(ReleasesApiSyncProperties.class)
 class ReleaseApiSyncApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext app = SpringApplication.run(ReleaseApiSyncApplication.class, args);
-        app.getBean(ReleaseUpdater.class).update();
+		ReleasesApiSyncProperties properties = app.getBean(ReleasesApiSyncProperties.class);
+		app.getBean(ReleasesService.class).syncReleases(properties.project().getRelease());
     }
 }

@@ -1,33 +1,35 @@
 package io.spring.github.actions.releasesapisync.releases;
 
-import java.util.Base64;
-
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties;
-
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-@EnableConfigurationProperties(ReleasesApiSyncProperties.class)
 @Configuration
 class ReleaseSyncConfiguration {
 	@Bean
-	RestClient.Builder rest(ReleasesApiSyncProperties properties) {
-		String authString = properties.project().slug() + ":" + properties.api().token();
-		String base64Creds = Base64.getEncoder().encodeToString(authString.getBytes());
-		return RestClient.builder()
-				.baseUrl(properties.api().url())
-				.defaultHeader("Authorization", "Basic " + base64Creds);
+	ReleasesService releasesService(RestClient.Builder builder, ReleasesApiSyncProperties properties) {
+		addBase(builder, properties);
+		addAuthentication(builder, properties);
+		var factory = HttpServiceProxyFactory
+				.builderFor(RestClientAdapter.create(builder.build()))
+				.build();
+		var releases = factory.createClient(EmbeddedReleasesService.class);
+		return new ReleasesServiceAdapter(properties.project().name(), releases);
+
 	}
 
+	private void addBase(RestClient.Builder builder, ReleasesApiSyncProperties properties) {
+		var url = properties.api().url();
+		builder.baseUrl(url);
+	}
 
-	@Bean
-	ReleasesService releasesService(RestClient.Builder rest) {
-		RestClientAdapter adapter = RestClientAdapter.create(rest.build());
-		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-		return new ReleasesServiceAdapter(factory.createClient(EmbeddedReleasesService.class));
+	private void addAuthentication(RestClient.Builder builder, ReleasesApiSyncProperties properties) {
+		var name = properties.project().name();
+		var token = properties.api().token();
+		builder.requestInterceptor(new BasicAuthenticationInterceptor(name, token));
 	}
 }

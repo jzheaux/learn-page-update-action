@@ -16,19 +16,38 @@
 
 package io.spring.github.actions.releasesapisync.releases;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public interface ReleasesService {
-    Collection<FetchedRelease> getReleases(String project);
 
-    void createRelease(String project, Release release);
+    Collection<FetchedRelease> getReleases();
 
-    void deleteRelease(String project, String release);
+    void createRelease(Release release);
+
+	void deleteRelease(String release);
+
+	default void createReleases(Release... releases) {
+		Arrays.stream(releases).forEach(this::createRelease);
+	}
+
+	default void deleteReleasesByGeneration(Release release) {
+		getReleases().stream()
+				.filter(release::isSameMajorMinor)
+				.map(FetchedRelease::version)
+				.forEach(this::deleteRelease);
+	}
+
+	default void syncReleases(Release latest) {
+		deleteReleasesByGeneration(latest);
+		createReleases(latest, latest.nextSnapshot());
+	}
 
     record FetchedRelease(String version, String referenceDocUrl, String apiDocUrl, String status, boolean current) {
     }
 
     record Release(String version, boolean isAntora, String referenceDocUrl, String apiDocUrl) {
+
         public boolean isSameMajorMinor(FetchedRelease other) {
             String[] parts = this.version.split("[\\.\\-]");
             String[] otherParts = other.version().split("[\\.\\-]");

@@ -30,10 +30,10 @@ public record ReleasesApiSyncProperties(@DefaultValue Api api, @DefaultValue Pro
     public record Api(@DefaultValue("https://api.spring.io") String url, String token) {
     }
 
-    public record Project(String slug, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
+    public record Project(String name, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
         public Release getRelease() {
-            String refdocUrl = this.refdoc.template().replace("{slug}", this.slug);
-            String apidocUrl = this.apidoc.template().replace("{slug}", this.slug);
+            String refdocUrl = this.refdoc.template().replace("{slug}", this.name);
+            String apidocUrl = this.apidoc.template().replace("{slug}", this.name);
             return new Release(this.version, this.refdoc.antora, refdocUrl, apidocUrl);
         }
     }

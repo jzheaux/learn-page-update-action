@@ -14,7 +14,7 @@ import org.springframework.web.service.annotation.PostExchange;
 interface EmbeddedReleasesService {
 
 	@GetExchange("/projects/{project}/releases")
-	EmbeddedReleases getEmbeddedReleases(@PathVariable(name="project") String project);
+    EmbeddedReleasesWrapper getEmbeddedReleases(@PathVariable(name="project") String project);
 
 	@PostExchange("/projects/{project}/releases")
 	void createRelease(@PathVariable(name="project") String project, @RequestBody Release release);
@@ -22,6 +22,10 @@ interface EmbeddedReleasesService {
 	@DeleteExchange("/projects/{project}/releases/{release}")
 	void deleteRelease(@PathVariable(name="project") String project, @PathVariable(name="release") String release);
 
-	record EmbeddedReleases(Collection<FetchedRelease> releases) {
+	record EmbeddedReleasesWrapper(EmbeddedReleases _embedded) {
+
+    }
+
+    record EmbeddedReleases(Collection<FetchedRelease> releases) {
 	}
 }
