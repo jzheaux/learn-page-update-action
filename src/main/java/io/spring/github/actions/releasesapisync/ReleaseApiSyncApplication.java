@@ -25,9 +25,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @EnableConfigurationProperties(ReleasesApiSyncProperties.class)
-class ReleaseApiSyncApplication {
+public class ReleaseApiSyncApplication {
 
-	static void main(String[] args) {
+	public static void main(String[] args) {
 		ConfigurableApplicationContext app = SpringApplication.run(ReleaseApiSyncApplication.class, args);
 		ReleasesApiSyncProperties properties = app.getBean(ReleasesApiSyncProperties.class);
 		app.getBean(ReleasesService.class).syncReleases(properties.project().getRelease());

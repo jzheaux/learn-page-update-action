@@ -2,15 +2,9 @@ name: "releases-api-sync-action"
 description: "Rotate Spring project releases on api.spring.io"
 author: "jzheaux"
 inputs:
-  version:
-    description: "The current GA version"
-    required: true
-  github-token:
-    description: "GitHub PAT, used for authenticating to api.spring.io"
-    required: true
   api-doc-url:
-    description: "Docs template with {version}"
-    default: "https://docs.spring.io/{slug}/docs/{version}/javadoc-api"
+    description: "The URL to the project's JavaDoc; supports {version} placeholder"
+    default: "https://docs.spring.io/{project}/site/docs/{version}/api/"
     required: false
   base-uri:
     description: "Base URI for the Spring Project Service"
@@ -20,12 +14,15 @@ inputs:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
     required: false
-  reference-doc-url:
-    description: "Reference docs template with {version}"
-    default: "https://docs.spring.io/{slug}/reference/{version}/index.html"
+  name:
+    description: "the project name (for example, spring-security); will use repo name if not provided"
     required: false
-  slug:
-    description: "Spring project slug (e.g., spring-security); will use repo name if not provided"
+  reference-doc-url:
+    description: "The URL to the project's reference documentation; supports {version} placeholder"
+    default: "https://docs.spring.io/{project}/reference/{version}/index.html"
+    required: false
+  version:
+    description: "The current GA version; will read gradle.properties or pom.xml if not provided"
     required: false
 
 runs:
@@ -33,8 +30,8 @@ runs:
   image: 'Dockerfile'
   args:
     - --releases.api.uri=${{ inputs.base-uri }}
-    - --releases.api.token=${{ inputs.github-token }}
-    - --releases.project.slug=${{ inputs.slug || github.event.repository.name }}
+    - --releases.api.token=${{ github.token }}
+    - --releases.project.name=${{ inputs.slug || github.event.repository.name }}
     - --releases.project.version=${{ inputs.version }}
     - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
     - --releases.project.refdoc.url=${{ inputs.reference-doc-url }}
