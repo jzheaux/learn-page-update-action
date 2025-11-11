@@ -17,6 +17,7 @@
 package io.spring.github.actions.releasesapisync;
 
 import io.spring.github.actions.releasesapisync.releases.ReleasesService;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,7 +31,15 @@ public class ReleaseApiSyncApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext app = SpringApplication.run(ReleaseApiSyncApplication.class, args);
 		ReleasesApiSyncProperties properties = app.getBean(ReleasesApiSyncProperties.class);
-		app.getBean(ReleasesService.class).syncReleases(properties.project().getRelease());
+		Release release = properties.project().getRelease();
+		ReleasesService releases = app.getBean(ReleasesService.class);
+		if (release.version().endsWith("-SNAPSHOT")) {
+			releases.deleteRelease(release.version());
+			releases.createRelease(release);
+		}
+		else {
+			releases.syncReleases(release);
+		}
 	}
 
 }
