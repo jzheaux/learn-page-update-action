@@ -16,7 +16,9 @@
 
 package io.spring.github.actions.releasesapisync;
 
-import io.spring.github.actions.releasesapisync.releases.ReleasesService.Release;
+import java.nio.file.Path;
+
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.ReleaseWrite;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -25,20 +27,24 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * Configuration properties for the releases API sync action.
  *
  * @author Josh Cummings
- * @param api the API connection details
+ * @param documentationLocation the location of the documentation.json on the file system,
+ * relative to the current working directory
  * @param project the Spring project details
  */
 @ConfigurationProperties(prefix = "releases")
-public record ReleasesApiSyncProperties(@DefaultValue Api api, @DefaultValue Project project) {
+public record ReleasesApiSyncProperties(
+		@DefaultValue("spring-website-content/project/{slug}") String documentationLocation,
+		@DefaultValue Project project) {
 
-	public record Api(@DefaultValue("https://api.spring.io") String url, String token) {
+	public Path getDocumentationPath() {
+		return Path.of(this.documentationLocation.replace("{slug}", this.project.slug), "documentation.json");
 	}
 
-	public record Project(String name, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
-		public Release getRelease() {
-			String refdocUrl = this.refdoc.template().replace("{slug}", this.name);
-			String apidocUrl = this.apidoc.template().replace("{slug}", this.name);
-			return new Release(this.version, this.refdoc.antora, refdocUrl, apidocUrl);
+	public record Project(String slug, String version, @DefaultValue Apidoc apidoc, @DefaultValue Refdoc refdoc) {
+		public ReleaseWrite getRelease() {
+			String refdocUrl = this.refdoc.template().replace("{slug}", this.slug);
+			String apidocUrl = this.apidoc.template().replace("{slug}", this.slug);
+			return ReleaseWrite.fromVersion(this.version, this.refdoc.antora, refdocUrl, apidocUrl);
 		}
 	}
 

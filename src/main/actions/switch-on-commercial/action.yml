@@ -1,0 +1,32 @@
+name: "releases-api-sync-action"
+description: "Update #learn Page on Spring OSS and Commercial Websites"
+author: "jzheaux"
+inputs:
+  if-oss:
+    description: "Output this value if the project is an OSS project"
+    required: true
+  if-commercial:
+    description: "Output this value if the project is a Commercial project"
+    required: true
+outputs:
+  result:
+    description: "Either the value if if-oss or if-commercial"
+    value: ${{ steps.compute-result.outputs.result }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Switch on repository type
+    - id: switch
+    - shell: bash
+    - env:
+        IS_COMMERCIAL: ${{ endsWith(github.repository, '-commercial') }}
+        IF_OSS: ${{ inputs.if-oss }}
+        IF_COMMERCIAL: ${{ inputs.if-commercial }}
+    - run: |
+        set -euo pipefail
+        if $IS_COMMERCIAL; then
+         RESULT="$IF_COMMERCIAL"
+        else
+         RESULT="$IF_OSS"
+        fi
+        echo "result=$RESULT" >> "$GITHUB_OUTPUT"

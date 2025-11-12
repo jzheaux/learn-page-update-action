@@ -1,0 +1,40 @@
+name: "releases-api-sync-action"
+description: "Update #learn Page on Spring OSS and Commercial Websites"
+author: "jzheaux"
+inputs:
+  github-token:
+    description: "The GitHub token needed to access spring-website-content or spring-website-commercial-content"
+    required: true
+  api-doc-url:
+    description: "The URL to the project's JavaDoc; supports {version} placeholder"
+    default: "https://docs.spring.io/{project}/site/docs/{version}/api/"
+    required: false
+  is-commercial:
+    description: "Whether the project is commercial; defaults to true if repository name ends in '-commercial'"
+    required: false
+  is-antora:
+    description: "Whether the reference documentation is Antora-based; defaults to true"
+    default: "true"
+    required: false
+  name:
+    description: "the project name (for example, spring-security); will use repo name if not provided"
+    required: false
+  reference-doc-url:
+    description: "The URL to the project's reference documentation; supports {version} placeholder"
+    default: "https://docs.spring.io/{project}/reference/{version}/index.html"
+    required: false
+  version:
+    description: "The current GA version; will read gradle.properties or pom.xml if not provided"
+    required: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - --releases.api.uri=${{ inputs.base-uri }}
+    - --releases.api.token=${{ github.token }}
+    - --releases.project.slug=${{ inputs.slug }}
+    - --releases.project.version=${{ inputs.version }}
+    - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
+    - --releases.project.refdoc.url=${{ inputs.reference-doc-url }}
+    - --releases.project.refdoc.antora=${{ inputs.is-antora }}

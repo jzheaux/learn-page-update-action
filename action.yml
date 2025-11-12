@@ -1,23 +1,25 @@
 name: "releases-api-sync-action"
-description: "Rotate Spring project releases on api.spring.io"
+description: "Update #learn Page on Spring OSS and Commercial Websites"
 author: "jzheaux"
 inputs:
+  github-token:
+    description: "The GitHub token needed to access spring-website-content or spring-website-commercial-content"
+    required: true
   api-doc-url:
     description: "The URL to the project's JavaDoc; supports {version} placeholder"
     default: "https://docs.spring.io/{project}/site/docs/{version}/api/"
     required: false
-  base-uri:
-    description: "Base URI for the Spring Project Service"
-    default: "https://api.spring.io"
+  website-repository:
+    description: "The Spring Website GitHub repo from which to checkout documentation files"
     required: false
   is-antora:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
     required: false
-  name:
+  project-slug:
     description: "the project name (for example, spring-security); will use repo name if not provided"
     required: false
-  reference-doc-url:
+  ref-doc-url:
     description: "The URL to the project's reference documentation; supports {version} placeholder"
     default: "https://docs.spring.io/{project}/reference/{version}/index.html"
     required: false
@@ -26,13 +28,39 @@ inputs:
     required: false
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - --releases.api.uri=${{ inputs.base-uri }}
-    - --releases.api.token=${{ github.token }}
-    - --releases.project.name=${{ inputs.slug || github.event.repository.name }}
-    - --releases.project.version=${{ inputs.version }}
-    - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
-    - --releases.project.refdoc.url=${{ inputs.reference-doc-url }}
-    - --releases.project.refdoc.antora=${{ inputs.is-antora }}
+  using: 'composite'
+  steps:
+    - name: Compute Spring Website Content Repository
+      id: compute-repo
+      uses: ./src/main/actions/switch-on-commercial
+      with:
+        if-oss: spring-io/spring-website-content
+        if-commercial: spring-io/spring-website-commercial-content
+    - name: Checkout Website Content Documentation File
+      uses: actions/checkout@v5
+      with:
+        repository: ${{ inputs.website-repository || steps.compute-repo.outputs.result }}
+        token: ${{ inputs.github-token }}
+        path: spring-website-content
+        sparse-checkout: |
+          project
+        sparse-checkout-cone: true
+    - name: Compute Documentation Slug
+      id: documentation-slug
+      uses: ./src/main/actions/compute-slug
+    - name: Update Documentation File
+      uses: ./src/main/actions/update-documentation-file
+      with:
+        project-slug: ${{ steps.documentation-slug.outputs.slug }}
+        version: ${{ inputs.version }}
+        github-token: ${{ inputs.github-token }}
+        api-doc-url: ${{ inputs.api-doc-url }}
+        ref-doc-url: ${{ inputs.reference-doc-url }}
+        is-antora: ${{ inputs.is-antora }}
+    - name: Commit documentation updates
+      uses: stefanzweifel/git-auto-commit-action@v7
+      with:
+        repository: spring-website-content
+        commit_message: "Update #learn Page for ${{ github.repository }} ${{ inputs.version }}"
+        branch: main
+        file_pattern: project/**

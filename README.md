@@ -25,14 +25,15 @@ Running in the above will result in new entries, `7.0.1` and `7.0.2-SNAPSHOT`, r
 
 This action supports the following arguments:
 
-| Argument    | Description                                                                                        | Default Value                                                   |
-|-------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| name        | your project's name                                                                                | the name of the repository                                      
-| version     | the version of the project being built                                                             | the value found in your `gradle.properties` or `pom.xml` file   |
-| base-uri    | the base URI for the Project Server API                                                            | https://api.spring.io                                           |
-| api-doc-url | the link to your project's JavaDoc; supports `{name}` and `{version}` placeholders                 | https://docs.spring.io/{project}/site/docs/{version}/api/       |
-| ref-doc-url | the link to your project's reference documentation; supports `{name}` and `{version}` placeholders | https://docs.spring.io/{project}/reference/{version}/index.html |
-| is-antora   | whether your reference documentation is Antora-based                                               | true                                                            |
+| Argument           | Description                                                                                        | Default Value                                                                    |
+|--------------------|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| project-slug       | your project's website slug                                                                        | the name of the repository, less any -commercial suffix                          
+| version            | the version of the project being built                                                             | the value found in your `gradle.properties` or `pom.xml` file                    |
+| website-repository | the website repository, like spring-io/spring-website-content, to pull and push changes from       | spring-website-content for OSS, spring-website-commercial-cotnent for Commercial |
+| github-token       | the GitHub token for the website repository                                                        | https://api.spring.io                                                            |
+| api-doc-url        | the link to your project's JavaDoc; supports `{name}` and `{version}` placeholders                 | https://docs.spring.io/{project}/site/docs/{version}/api/                        |
+| ref-doc-url        | the link to your project's reference documentation; supports `{name}` and `{version}` placeholders | https://docs.spring.io/{project}/reference/{version}/index.html                  |
+| is-antora          | whether your reference documentation is Antora-based                                               | true                                                                             |
 
 For example, if your links are not Antora-based, you can do something like the following:
 

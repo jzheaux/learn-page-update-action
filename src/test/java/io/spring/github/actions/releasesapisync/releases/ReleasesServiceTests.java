@@ -16,68 +16,28 @@
 
 package io.spring.github.actions.releasesapisync.releases;
 
-import java.util.List;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
 
 import io.spring.github.actions.releasesapisync.ReleasesApiSyncProperties;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.ReleaseRead;
+import io.spring.github.actions.releasesapisync.releases.ReleasesService.ReleaseWrite;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.ResponseActions;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RestClientTest(properties = { "releases.api.url=http://localhost:8080", "releases.api.token=token",
-		"releases.project.name=spring-boot", "releases.project.version=2.3.1" }, value = ReleasesService.class)
+@RestClientTest(properties = { "releases.api.token=token", "releases.project.slug=spring-boot",
+		"releases.project.version=2.3.1" }, value = ReleasesService.class)
 @Import(ReleaseSyncConfiguration.class)
 class ReleasesServiceTests {
-
-	static final String API_BASE = "http://localhost:8080/projects/spring-boot";
-
-	static final String RELEASE_TEMPLATE = """
-			{
-				"version" : "{version}",
-				"apiDocUrl" : "https://docs.spring.io/spring-boot/docs/{version}/api/",
-				"referenceDocUrl" : "https://docs.spring.io/spring-boot/docs/{version}/reference/html/",
-				"status" : "{status}",
-				"current" : true,
-				"_links" : {
-					"repository" : {
-						"href" : "https://api.spring.io/repositories/spring-releases"
-					},
-					"self" : {
-						"href" : "https://api.spring.io/projects/spring-boot/releases/{version}"
-					}
-				}
-			}
-			""";
-
-	static final String RELEASES_TEMPLATE = """
-			{
-				"_embedded" : {
-					"releases" : {releases}
-				},
-				"_links" : {
-					"project" : {
-						"href" : "https://api.spring.io/projects/spring-boot"
-					},
-					"current" : {
-						"href" : "https://api.spring.io/projects/spring-boot/releases/current"
-					}
-				}
-			}
-			""";
-
-	@Autowired
-	MockRestServiceServer server;
 
 	@Autowired
 	ReleasesService releases;
@@ -85,61 +45,50 @@ class ReleasesServiceTests {
 	@Autowired
 	ReleasesApiSyncProperties properties;
 
+	Path documentation = Path.of("spring-website-content/project/spring-boot", "documentation.json");
+
+	@BeforeEach
+	void createDocumentationFile() throws Exception {
+		try {
+			new File("spring-website-content/project/spring-boot").mkdirs();
+			Files.writeString(this.documentation, "[]");
+		}
+		catch (Exception ex) {
+			System.out.println("fail");
+		}
+	}
+
+	@AfterEach
+	void deleteDocumentationFile() throws Exception {
+		Files.delete(this.documentation);
+	}
+
 	@Test
-	void updateWhenNoReleasesThenAdds() {
-		get().andRespond(withSuccess(releases(), MediaType.APPLICATION_JSON));
-		post().andExpect(content().string(containsString("2.3.1"))).andRespond(withSuccess());
-		post().andExpect(content().string(containsString("2.3.2-SNAPSHOT"))).andRespond(withSuccess());
+	void updateWhenNoReleasesThenAdds() throws Exception {
 		this.releases.syncReleases(this.properties.project().getRelease());
-		this.server.verify();
+		Collection<ReleaseRead> releases = this.releases.getReleases();
+		assertThat(releases).extracting(ReleaseRead::version).containsExactly("2.3.2-SNAPSHOT", "2.3.1");
 	}
 
 	@Test
 	void updateWhenExistingReleasesThenReplaces() {
-		String releases = releases(ga("2.3.0"), snapshot("2.3.1-SNAPSHOT"));
-		get().andRespond(withSuccess(releases, MediaType.APPLICATION_JSON));
-		delete("2.3.0").andRespond(withSuccess());
-		delete("2.3.1-SNAPSHOT").andRespond(withSuccess());
-		post().andExpect(content().string(containsString("2.3.1"))).andRespond(withSuccess());
-		post().andExpect(content().string(containsString("2.3.2-SNAPSHOT"))).andRespond(withSuccess());
+		this.releases.createReleases(release("2.3.0"), release("2.3.1-SNAPSHOT"));
 		this.releases.syncReleases(this.properties.project().getRelease());
+		Collection<ReleaseRead> releases = this.releases.getReleases();
+		assertThat(releases).extracting(ReleaseRead::version).containsExactly("2.3.2-SNAPSHOT", "2.3.1");
 	}
 
 	@Test
 	void updateWhenMultipleExistingReleasesThenReplaces() {
-		String releases = releases(ga("2.3.0"), snapshot("2.3.1-SNAPSHOT"), ga("2.3.1"), snapshot("2.3.2-SNAPSHOT"));
-		get().andRespond(withSuccess(releases, MediaType.APPLICATION_JSON));
-		delete("2.3.0").andRespond(withSuccess());
-		delete("2.3.1-SNAPSHOT").andRespond(withSuccess());
-		delete("2.3.1").andRespond(withSuccess());
-		delete("2.3.2-SNAPSHOT").andRespond(withSuccess());
-		post().andExpect(content().string(containsString("2.3.1"))).andRespond(withSuccess());
-		post().andExpect(content().string(containsString("2.3.2-SNAPSHOT"))).andRespond(withSuccess());
+		this.releases.createReleases(release("2.3.0"), release("2.3.1-SNAPSHOT"), release("2.3.1"),
+				release("2.3.2-SNAPSHOT"));
 		this.releases.syncReleases(this.properties.project().getRelease());
+		Collection<ReleaseRead> releases = this.releases.getReleases();
+		assertThat(releases).extracting(ReleaseRead::version).containsExactly("2.3.2-SNAPSHOT", "2.3.1");
 	}
 
-	ResponseActions get() {
-		return this.server.expect(requestTo(API_BASE + "/releases")).andExpect(method(HttpMethod.GET));
-	}
-
-	ResponseActions post() {
-		return this.server.expect(requestTo(API_BASE + "/releases")).andExpect(method(HttpMethod.POST));
-	}
-
-	ResponseActions delete(String version) {
-		return this.server.expect(requestTo(API_BASE + "/releases/" + version)).andExpect(method(HttpMethod.DELETE));
-	}
-
-	String ga(String version) {
-		return RELEASE_TEMPLATE.replaceAll("\\{version}", version).replace("{status}", "GENERAL_AVAILABILITY");
-	}
-
-	String snapshot(String version) {
-		return RELEASE_TEMPLATE.replaceAll("\\{version}", version).replace("{status}", "SNAPSHOT");
-	}
-
-	String releases(String... releases) {
-		return RELEASES_TEMPLATE.replace("{releases}", List.of(releases).toString());
+	ReleaseWrite release(String version) {
+		return ReleaseWrite.fromVersion(version, true, "ref", "api");
 	}
 
 }

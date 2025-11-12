@@ -1,0 +1,21 @@
+name: "compute-slug"
+description: "Compute the Documentation Slug"
+author: "jzheaux"
+inputs:
+  project-name:
+    description: "the project name (for example, spring-security); will use repo name if not provided"
+    required: false
+outputs:
+  slug:
+    description: "The Documentation Slug"
+    value: ${{ steps.compute-slug.outputs.slug }}
+runs:
+  using: "composite"
+  steps:
+    - name: Compute Documentation Slug
+      id: compute-slug
+      shell: bash
+      run: |
+        FULL_REPO_NAME="${{ inputs.project-name || github.repository }}"
+        SLUG=$(basename "${FULL_REPO_NAME%${'-commercial'}}")
+        echo "slug=${SLUG}" >> $GITHUB_OUTPUT
