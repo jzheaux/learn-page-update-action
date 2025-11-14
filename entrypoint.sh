@@ -7,4 +7,4 @@ else
   export RELEASES_PROJECT_VERSION=$(cat gradle.properties | sed -n '/^version=/ { s/^version=//;p }')
 fi
 
-java -jar /opt/action/releases-api-sync.jar $@
+java -jar /opt/action/learn-page-update.jar $@

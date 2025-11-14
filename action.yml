@@ -39,9 +39,6 @@ runs:
       shell: bash
       run: |
         cp build/libs/releases-api-sync-action.jar src/main/actions/update-documentation-file/app.jar
-    - name: Compute Version
-      id: compute-version
-      uses: ./src/main/actions/compute-version
     - name: Compute Spring Website Content Repository
       id: compute-repo
       uses: ./src/main/actions/switch-on-commercial
@@ -74,6 +71,6 @@ runs:
       uses: stefanzweifel/git-auto-commit-action@v7
       with:
         repository: spring-website-content
-        commit_message: "Update #learn Page for ${{ github.repository }} ${{ inputs.version }}"
+        commit_message: "Update #learn Page for ${{ github.repository }} ${{ inputs.version || steps.compute-version.outputs.version }}"
         branch: main
         file_pattern: project/**
