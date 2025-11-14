@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -jar /opt/action/update-learn-page.jar $@
+java -jar /opt/action/learn-page-update.jar $@

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-learn-page:
+  learn-page-update:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sync spring-security 7.0.0 to Releases API
-        uses: jzheaux/update-learn-page-action@main
+        uses: jzheaux/learn-page-update-action@main
         with:
           github-token: ${{ secrets.WEBSITE_CONTENT_PAT }}
           project-name: spring-security

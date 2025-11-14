@@ -1,4 +1,4 @@
-name: "update-learn-page-action"
+name: "learn-page-update-action"
 description: "Update #learn Page on Spring OSS and Commercial Websites"
 author: "jzheaux"
 inputs:
@@ -38,7 +38,7 @@ runs:
     - name: Stage jar for action B
       shell: bash
       run: |
-        cp build/libs/update-learn-page-action.jar src/main/actions/update-documentation-file/app.jar
+        cp build/libs/learn-page-update-action.jar src/main/actions/update-documentation-file/app.jar
     - name: Compute Spring Website Content Repository
       id: compute-repo
       uses: ./src/main/actions/switch-on-commercial
