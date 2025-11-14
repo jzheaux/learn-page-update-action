@@ -32,10 +32,9 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v5
-    - name: Build jar
-      shell: bash
-      run: |
-        ./gradlew -Dorg.gradle.welcome=never --no-daemon bootJar
+    - uses: spring-io/spring-gradle-build-action@v2
+      name: Run tests
+      run: ./gradlew -Dorg.gradle.welcome=never --no-daemon bootJar
     - name: Stage jar for action B
       shell: bash
       run: |
