@@ -1,5 +1,5 @@
-name: "releases-api-sync-action"
-description: "Update #learn Page on Spring OSS and Commercial Websites"
+name: "update-documentation-file"
+description: "Update documentation.json File"
 author: "jzheaux"
 inputs:
   github-token:
