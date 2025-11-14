@@ -17,5 +17,5 @@ runs:
       shell: bash
       run: |
         FULL_REPO_NAME="${{ inputs.project-name || github.repository }}"
-        SLUG=$(basename "${FULL_REPO_NAME%${'-commercial'}}")
+        SLUG=$(basename "${FULL_REPO_NAME%"-commercial"}")
         echo "slug=${SLUG}" >> $GITHUB_OUTPUT
