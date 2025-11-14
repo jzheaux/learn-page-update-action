@@ -1,0 +1,23 @@
+name: Learn Page Update Action Tests
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-releases-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync spring-security 7.0.0 to Releases API
+        uses: jzheaux/releases-api-sync-action@main
+        with:
+          github-token: ${{ secrets.WEBSITE_CONTENT_PAT }}
+          project-name: spring-security
+          version: 7.0.0
+          website-repository: jzheaux/jzheaux-website-content
