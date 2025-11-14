@@ -87,6 +87,17 @@ class ReleasesServiceTests {
 		assertThat(releases).extracting(ReleaseRead::version).containsExactly("2.3.2-SNAPSHOT", "2.3.1");
 	}
 
+	@Test
+	void update() throws Exception {
+		this.releases.createReleases(release("6.5.7"), release("6.5.8-SNAPSHOT"), release("7.0.0-RC3"),
+				release("7.0.0-SNAPSHOT"));
+		this.releases
+			.syncReleases(new ReleaseWrite("7.0.0", true, "ref", "api", ReleasesService.Status.GENERAL_AVAILABILITY));
+		Collection<ReleaseRead> releases = this.releases.getReleases();
+		assertThat(releases).extracting(ReleaseRead::version)
+			.containsExactly("7.0.1-SNAPSHOT", "7.0.0", "6.5.8-SNAPSHOT", "6.5.7");
+	}
+
 	ReleaseWrite release(String version) {
 		return ReleaseWrite.fromVersion(version, true, "ref", "api");
 	}

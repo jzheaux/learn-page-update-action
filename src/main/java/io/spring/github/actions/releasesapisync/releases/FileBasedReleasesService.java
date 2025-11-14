@@ -56,11 +56,10 @@ class FileBasedReleasesService implements ReleasesService {
 
 	@Override
 	public void deleteRelease(String version) {
-		Collection<ReleaseWrite> updates = new TreeSet<>();
 		Collection<ReleaseWrite> releases = getReleases(new TypeReference<>() {
 		});
 		releases.removeIf((r) -> r.version().equals(version));
-		updateFile(markCurrent(updates));
+		updateFile(markCurrent(releases));
 	}
 
 	private <T> Collection<T> getReleases(TypeReference<Collection<T>> ref) {
