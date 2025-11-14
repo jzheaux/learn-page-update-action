@@ -16,10 +16,10 @@ inputs:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
     required: false
-  name:
+  project-slug:
     description: "the project name (for example, spring-security); will use repo name if not provided"
     required: false
-  reference-doc-url:
+  ref-doc-url:
     description: "The URL to the project's reference documentation; supports {version} placeholder"
     default: "https://docs.spring.io/{project}/reference/{version}/index.html"
     required: false
@@ -33,8 +33,8 @@ runs:
   args:
     - --releases.api.uri=${{ inputs.base-uri }}
     - --releases.api.token=${{ github.token }}
-    - --releases.project.slug=${{ inputs.slug }}
+    - --releases.project.slug=${{ inputs.project-slug }}
     - --releases.project.version=${{ inputs.version }}
     - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
-    - --releases.project.refdoc.url=${{ inputs.reference-doc-url }}
+    - --releases.project.refdoc.url=${{ inputs.ref-doc-url }}
     - --releases.project.refdoc.antora=${{ inputs.is-antora }}

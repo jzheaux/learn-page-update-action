@@ -16,7 +16,7 @@ inputs:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
     required: false
-  project-slug:
+  project-name:
     description: "the project name (for example, spring-security); will use repo name if not provided"
     required: false
   ref-doc-url:
@@ -44,10 +44,11 @@ runs:
         path: spring-website-content
         sparse-checkout: |
           project
-        sparse-checkout-cone: true
     - name: Compute Documentation Slug
       id: documentation-slug
       uses: ./src/main/actions/compute-slug
+      with:
+        project-name: ${{ inputs.project-name || github.repository }}
     - name: Update Documentation File
       uses: ./src/main/actions/update-documentation-file
       with:
