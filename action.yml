@@ -30,6 +30,16 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    - name: Build jar
+      shell: bash
+      run: |
+        ./gradlew -Dorg.gradle.welcome=never --no-daemon bootJar
+    - name: Stage jar for action B
+      shell: bash
+      run: |
+        cp build/libs/releases-api-sync-action.jar src/main/actions/update-documenation-file/app.jar
     - name: Compute Spring Website Content Repository
       id: compute-repo
       uses: ./src/main/actions/switch-on-commercial

@@ -31,8 +31,6 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - --releases.api.uri=${{ inputs.base-uri }}
-    - --releases.api.token=${{ inputs.github-token }}
     - --releases.project.slug=${{ inputs.project-slug }}
     - --releases.project.version=${{ inputs.version }}
     - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
