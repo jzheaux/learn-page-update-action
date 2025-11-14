@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 class FileBasedReleasesService implements ReleasesService {
@@ -34,9 +36,12 @@ class FileBasedReleasesService implements ReleasesService {
 
 	private final ObjectMapper mapper;
 
+	private final DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+
 	FileBasedReleasesService(Path filename, ObjectMapper mapper) {
 		this.filename = filename;
 		this.mapper = mapper;
+		this.prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 	}
 
 	@Override
@@ -92,7 +97,7 @@ class FileBasedReleasesService implements ReleasesService {
 
 	private void updateFile(Collection<ReleaseRead> releases) {
 		try (OutputStream os = new FileOutputStream(this.filename.toFile())) {
-			this.mapper.writeValue(os, releases);
+			this.mapper.writer(this.prettyPrinter).writeValue(os, releases);
 		}
 		catch (Exception ex) {
 			throw new RuntimeException("Unable to update versions", ex);
