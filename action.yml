@@ -31,14 +31,9 @@ runs:
   using: 'composite'
   steps:
     - uses: actions/checkout@v5
-    - uses: spring-io/spring-gradle-build-action@v2
-    - name: Build Project
+    - name: Install Dependencies
       shell: bash
-      run: ./gradlew -Dorg.gradle.welcome=never --no-daemon bootJar
-    - name: Stage jar for action B
-      shell: bash
-      run: |
-        cp build/libs/learn-page-update-action.jar src/main/actions/update-documentation-file/app.jar
+      run: npm install
     - name: Compute Spring Website Content Repository
       id: compute-repo
       uses: ./src/main/actions/switch-on-commercial
@@ -58,6 +53,9 @@ runs:
       uses: ./src/main/actions/compute-slug
       with:
         project-name: ${{ inputs.project-name || github.repository }}
+    - name: Compute Version
+      id: compute-version
+      uses: ./src/main/actions/compute-version
     - name: Update Documentation File
       uses: ./src/main/actions/update-documentation-file
       with:
@@ -65,7 +63,7 @@ runs:
         project-slug: ${{ steps.documentation-slug.outputs.slug }}
         version: ${{ inputs.version || steps.compute-version.outputs.version }}
         api-doc-url: ${{ inputs.api-doc-url }}
-        ref-doc-url: ${{ inputs.reference-doc-url }}
+        ref-doc-url: ${{ inputs.ref-doc-url }}
         is-antora: ${{ inputs.is-antora }}
     - name: Commit documentation updates
       uses: stefanzweifel/git-auto-commit-action@v7

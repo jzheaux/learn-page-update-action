@@ -28,8 +28,8 @@ inputs:
     required: false
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'node20'
+  main: '../../../javascript/index.js'
   args:
     - --releases.project.slug=${{ inputs.project-slug }}
     - --releases.project.version=${{ inputs.version }}

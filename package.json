@@ -1,0 +1,17 @@
+{
+  "name": "releases-api-sync",
+  "version": "1.0.0",
+  "description": "Syncs releases with the documentation file",
+  "main": "src/main/javascript/index.js",
+  "scripts": {
+    "test": "jest",
+    "main": "node src/main/javascript/index.js"
+  },
+  "dependencies": {
+    "minimist": "^1.2.6",
+    "compare-versions": "^6.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
