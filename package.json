@@ -8,8 +8,9 @@
     "main": "node src/main/javascript/index.js"
   },
   "dependencies": {
-    "minimist": "^1.2.6",
-    "compare-versions": "^6.1.0"
+    "@actions/core": "^1.11.1",
+    "compare-versions": "^6.1.0",
+    "minimist": "^1.2.6"
   },
   "devDependencies": {
     "jest": "^29.7.0"

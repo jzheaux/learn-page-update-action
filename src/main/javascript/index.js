@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const minimist = require('minimist');
 // I will add compare-versions to package.json in a later step.
 const { compareVersions } = require('compare-versions');
+
+const { core } = require('@actions/core');
 
 function fromVersion(version, isAntora, referenceDocUrl, apiDocUrl) {
     let status;
@@ -80,7 +81,21 @@ function syncReleases(latestRelease, documentationPath, refdocUrlTemplate, apido
 }
 
 function main() {
-    const args = minimist(process.argv.slice(2));
+    const args = {
+        releases: {
+            project: {
+                slug: core.getInput("project-slug"),
+                version: core.getInput("version"),
+                apidoc: {
+                    url: core.getInput("api-doc-url")
+                },
+                refdoc: {
+                    url: core.getInput("ref-doc-url"),
+                    antora: core.getBooleanInput("is-antora") // automatically parses true/false
+                }
+            }
+        }
+    };
 
     if (!args.releases || !args.releases.project) {
         console.error("Invalid arguments. Expected format: --releases.project.slug=... --releases.project.version=... etc.");
