@@ -1,9 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-// I will add compare-versions to package.json in a later step.
+const core = require('@actions/core');
 const { compareVersions } = require('compare-versions');
-
-const { core } = require('@actions/core');
 
 function fromVersion(version, isAntora, referenceDocUrl, apiDocUrl) {
     let status;
@@ -55,8 +53,8 @@ function syncReleases(latestRelease, documentationPath, refdocUrl, apidocUrl) {
         releases = JSON.parse(fs.readFileSync(documentationPath, 'utf-8'));
     } catch (error) {
         if (error.code !== 'ENOENT') {
-            console.error(`Error reading ${documentationPath}:`, error);
-            process.exit(1);
+            core.setFailed(`Error reading ${documentationPath}: ${error}`);
+            return;
         }
     }
 
@@ -73,56 +71,35 @@ function syncReleases(latestRelease, documentationPath, refdocUrl, apidocUrl) {
         fs.writeFileSync(documentationPath, JSON.stringify(markedReleases, null, 2) + '\n');
         console.log(`Successfully updated ${documentationPath}`);
     } catch (error) {
-        console.error(`Error writing to ${documentationPath}:`, error);
-        process.exit(1);
+        core.setFailed(`Error writing to ${documentationPath}: ${error}`);
     }
 }
 
 function main() {
-    const args = {
-        releases: {
-            project: {
-                slug: core.getInput("project-slug"),
-                version: core.getInput("version"),
-                apidoc: {
-                    url: core.getInput("api-doc-url")
-                },
-                refdoc: {
-                    url: core.getInput("ref-doc-url"),
-                    antora: core.getBooleanInput("is-antora") // automatically parses true/false
-                }
-            }
-        }
-    };
+    const version = core.getInput('version', { required: true });
+    const slug = core.getInput('project-slug', { required: true });
+    const isAntora = core.getBooleanInput('is-antora', { required: true });
+    const refDocUrlTemplate = core.getInput('ref-doc-url', { required: true });
+    const apiDocUrlTemplate = core.getInput('api-doc-url', { required: true });
 
-    if (!args.releases || !args.releases.project) {
-        console.error("Invalid arguments. Expected format: --releases.project.slug=... --releases.project.version=... etc.");
-        process.exit(1);
+    if (version.endsWith("-SNAPSHOT")) {
+        core.setFailed("Please specify a non-SNAPSHOT release version to publish; it's accompanying SNAPSHOT version will also be published");
+        return;
     }
-
-    const project = args.releases.project;
-
-    if (project.version.endsWith("-SNAPSHOT")) {
-        console.error("Please specify a non-SNAPSHOT release version to publish; it's accompanying SNAPSHOT version will also be published");
-        process.exit(1);
-    }
-
-    const isAntora = project.refdoc.antora === 'true' || project.refdoc.antora === true;
-    const slug = project.slug;
 
     const documentationLocation = `spring-website-content/project/${slug}`;
     const documentationPath = path.join(documentationLocation, 'documentation.json');
 
-    const refdocUrl = project.refdoc.url.replace(/{project}|{slug}/g, slug);
-    const apidocUrl = project.apidoc.url.replace(/{project}|{slug}/g, slug);
+    const refdocUrl = refDocUrlTemplate.replace(/{project}|{slug}/g, slug);
+    const apidocUrl = apiDocUrlTemplate.replace(/{project}|{slug}/g, slug);
 
-    const latestRelease = fromVersion(project.version, isAntora, refdocUrl, apidocUrl);
+    const latestRelease = fromVersion(version, isAntora, refdocUrl, apidocUrl);
 
     try {
         fs.mkdirSync(documentationLocation, { recursive: true });
     } catch (error) {
-        console.error(`Error creating directory ${documentationLocation}:`, error);
-        process.exit(1);
+        core.setFailed(`Error creating directory ${documentationLocation}: ${error}`);
+        return;
     }
 
     syncReleases(latestRelease, documentationPath, refdocUrl, apidocUrl);
@@ -137,5 +114,6 @@ module.exports = {
     nextSnapshot,
     isSameMajorMinor,
     markCurrent,
-    syncReleases
+    syncReleases,
+    main
 };

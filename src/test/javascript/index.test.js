@@ -1,12 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+const core = require('@actions/core');
 const {
     fromVersion,
     nextSnapshot,
     isSameMajorMinor,
     markCurrent,
-    syncReleases
+    syncReleases,
+    main
 } = require('../../main/javascript/index');
+
+jest.mock('@actions/core');
 
 describe('Release Script', () => {
 
@@ -166,6 +170,60 @@ describe('Release Script', () => {
                     version: "1.0.0",
                     status: "GENERAL_AVAILABILITY",
                     current: false
+                }
+            ]);
+        });
+    });
+
+    describe('main', () => {
+        const documentationPath = path.join('spring-website-content/project/my-project/documentation.json');
+        const documentationDir = path.dirname(documentationPath);
+
+        beforeEach(() => {
+            if (fs.existsSync(documentationPath)) {
+                fs.unlinkSync(documentationPath);
+            }
+            if (fs.existsSync(documentationDir)) {
+                fs.rmSync(documentationDir, { recursive: true, force: true });
+            }
+        });
+
+        afterEach(() => {
+            if (fs.existsSync(documentationPath)) {
+                fs.unlinkSync(documentationPath);
+            }
+            if (fs.existsSync(documentationDir)) {
+                fs.rmSync(documentationDir, { recursive: true, force: true });
+            }
+            jest.clearAllMocks();
+        });
+
+        it('should call syncReleases with the correct parameters', () => {
+            core.getInput.mockReturnValueOnce("1.2.3") // version
+                         .mockReturnValueOnce("my-project") // project-slug
+                         .mockReturnValueOnce("https://docs.spring.io/{slug}/reference/{version}/index.html") // ref-doc-url
+                         .mockReturnValueOnce("https://docs.spring.io/{slug}/docs/{version}/javadoc-api"); // api-doc-url
+            core.getBooleanInput.mockReturnValueOnce(true); // is-antora
+
+            main();
+
+            const content = JSON.parse(fs.readFileSync(documentationPath, 'utf-8'));
+            expect(content).toEqual([
+                {
+                    version: "1.2.4-SNAPSHOT",
+                    isAntora: true,
+                    referenceDocUrl: "https://docs.spring.io/my-project/reference/{version}/index.html",
+                    apiDocUrl: "https://docs.spring.io/my-project/docs/{version}/javadoc-api",
+                    status: "SNAPSHOT",
+                    current: false
+                },
+                {
+                    version: "1.2.3",
+                    isAntora: true,
+                    referenceDocUrl: "https://docs.spring.io/my-project/reference/{version}/index.html",
+                    apiDocUrl: "https://docs.spring.io/my-project/docs/{version}/javadoc-api",
+                    status: "GENERAL_AVAILABILITY",
+                    current: true
                 }
             ]);
         });
