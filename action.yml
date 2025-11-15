@@ -12,6 +12,7 @@ inputs:
   website-repository:
     description: "The Spring Website GitHub repo from which to checkout documentation files"
     required: false
+    default: ''
   is-antora:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
@@ -26,6 +27,7 @@ inputs:
   version:
     description: "The current GA version; will read gradle.properties or pom.xml if not provided"
     required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -36,6 +38,7 @@ runs:
       run: npm install
     - name: Compute Spring Website Content Repository
       id: compute-repo
+      if: ${{ inputs.website-repository == '' }}
       uses: ./src/main/actions/switch-on-commercial
       with:
         if-oss: spring-io/spring-website-content
@@ -55,6 +58,7 @@ runs:
         project-name: ${{ inputs.project-name || github.repository }}
     - name: Compute Version
       id: compute-version
+      if: ${{ inputs.version == '' }}
       uses: ./src/main/actions/compute-version
     - name: Update Documentation File
       uses: ./src/main/actions/update-documentation-file
