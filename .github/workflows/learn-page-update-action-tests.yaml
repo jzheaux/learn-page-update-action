@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sync spring-security 7.0.0 to Releases API
-        uses: jzheaux/learn-page-update-action@feat/js-conversion
+        uses: jzheaux/learn-page-update-action@main
         with:
           github-token: ${{ secrets.WEBSITE_CONTENT_PAT }}
           project-name: spring-security
