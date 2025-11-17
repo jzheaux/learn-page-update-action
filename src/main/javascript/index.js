@@ -17,7 +17,7 @@ function fromVersion(version, isAntora, referenceDocUrl, apiDocUrl) {
     return { version, isAntora, referenceDocUrl, apiDocUrl, status };
 }
 
-function nextSnapshot(release, refdocUrlTemplate, apidocUrlTemplate) {
+function nextSnapshot(release, refdocUrl, apidocUrl) {
     const parts = release.version.split(/[.-]/);
     const major = parseInt(parts[0], 10);
     const minor = parseInt(parts[1], 10);
@@ -26,8 +26,6 @@ function nextSnapshot(release, refdocUrlTemplate, apidocUrlTemplate) {
         patch += 1;
     }
     const nextVersion = `${major}.${minor}.${patch}-SNAPSHOT`;
-    const refdocUrl = refdocUrlTemplate.replace('{version}', nextVersion);
-    const apidocUrl = apidocUrlTemplate.replace('{version}', nextVersion);
     return fromVersion(nextVersion, release.isAntora, refdocUrl, apidocUrl);
 }
 
@@ -51,7 +49,7 @@ function markCurrent(releases) {
     });
 }
 
-function syncReleases(latestRelease, documentationPath, refdocUrlTemplate, apidocUrlTemplate) {
+function syncReleases(latestRelease, documentationPath, refdocUrl, apidocUrl) {
     let releases = [];
     try {
         releases = JSON.parse(fs.readFileSync(documentationPath, 'utf-8'));
@@ -64,7 +62,7 @@ function syncReleases(latestRelease, documentationPath, refdocUrlTemplate, apido
 
     const filteredReleases = releases.filter(r => !isSameMajorMinor(latestRelease, r));
 
-    const snapshot = nextSnapshot(latestRelease, refdocUrlTemplate, apidocUrlTemplate);
+    const snapshot = nextSnapshot(latestRelease, refdocUrl, apidocUrl);
     const newReleases = [latestRelease, snapshot, ...filteredReleases];
 
     newReleases.sort((a, b) => compareVersions(b.version, a.version));
@@ -115,11 +113,8 @@ function main() {
     const documentationLocation = `spring-website-content/project/${slug}`;
     const documentationPath = path.join(documentationLocation, 'documentation.json');
 
-    const refdocUrlTemplate = project.refdoc.url.replace(/{project}|{slug}/g, slug);
-    const apidocUrlTemplate = project.apidoc.url.replace(/{project}|{slug}/g, slug);
-
-    const refdocUrl = refdocUrlTemplate.replace('{version}', project.version);
-    const apidocUrl = apidocUrlTemplate.replace('{version}', project.version);
+    const refdocUrl = project.refdoc.url.replace(/{project}|{slug}/g, slug);
+    const apidocUrl = project.apidoc.url.replace(/{project}|{slug}/g, slug);
 
     const latestRelease = fromVersion(project.version, isAntora, refdocUrl, apidocUrl);
 
@@ -130,7 +125,7 @@ function main() {
         process.exit(1);
     }
 
-    syncReleases(latestRelease, documentationPath, refdocUrlTemplate, apidocUrlTemplate);
+    syncReleases(latestRelease, documentationPath, refdocUrl, apidocUrl);
 }
 
 if (require.main === module) {

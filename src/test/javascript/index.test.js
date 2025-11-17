@@ -52,8 +52,8 @@ describe('Release Script', () => {
             expect(snapshot).toEqual({
                 version: "1.2.4-SNAPSHOT",
                 isAntora: true,
-                referenceDocUrl: "ref-url-1.2.4-SNAPSHOT",
-                apiDocUrl: "api-url-1.2.4-SNAPSHOT",
+                referenceDocUrl: "ref-url-{version}",
+                apiDocUrl: "api-url-{version}",
                 status: "SNAPSHOT"
             });
         });
@@ -111,7 +111,7 @@ describe('Release Script', () => {
         });
 
         it('should create a new documentation.json file with the latest release and snapshot', () => {
-            const latestRelease = fromVersion("2.0.0", true, "ref-2.0.0", "api-2.0.0");
+            const latestRelease = fromVersion("2.0.0", true, "ref-{version}", "api-{version}");
             syncReleases(latestRelease, documentationPath, "ref-{version}", "api-{version}");
 
             const content = JSON.parse(fs.readFileSync(documentationPath, 'utf-8'));
@@ -119,16 +119,16 @@ describe('Release Script', () => {
                 {
                     version: "2.0.1-SNAPSHOT",
                     isAntora: true,
-                    referenceDocUrl: "ref-2.0.1-SNAPSHOT",
-                    apiDocUrl: "api-2.0.1-SNAPSHOT",
+                    referenceDocUrl: "ref-{version}",
+                    apiDocUrl: "api-{version}",
                     status: "SNAPSHOT",
                     current: false
                 },
                 {
                     version: "2.0.0",
                     isAntora: true,
-                    referenceDocUrl: "ref-2.0.0",
-                    apiDocUrl: "api-2.0.0",
+                    referenceDocUrl: "ref-{version}",
+                    apiDocUrl: "api-{version}",
                     status: "GENERAL_AVAILABILITY",
                     current: true
                 }
@@ -141,7 +141,7 @@ describe('Release Script', () => {
             ];
             fs.writeFileSync(documentationPath, JSON.stringify(existingReleases, null, 2));
 
-            const latestRelease = fromVersion("2.0.0", true, "ref-2.0.0", "api-2.0.0");
+            const latestRelease = fromVersion("2.0.0", true, "ref-{version}", "api-{version}");
             syncReleases(latestRelease, documentationPath, "ref-{version}", "api-{version}");
 
             const content = JSON.parse(fs.readFileSync(documentationPath, 'utf-8'));
@@ -149,16 +149,16 @@ describe('Release Script', () => {
                 {
                     version: "2.0.1-SNAPSHOT",
                     isAntora: true,
-                    referenceDocUrl: "ref-2.0.1-SNAPSHOT",
-                    apiDocUrl: "api-2.0.1-SNAPSHOT",
+                    referenceDocUrl: "ref-{version}",
+                    apiDocUrl: "api-{version}",
                     status: "SNAPSHOT",
                     current: false
                 },
                 {
                     version: "2.0.0",
                     isAntora: true,
-                    referenceDocUrl: "ref-2.0.0",
-                    apiDocUrl: "api-2.0.0",
+                    referenceDocUrl: "ref-{version}",
+                    apiDocUrl: "api-{version}",
                     status: "GENERAL_AVAILABILITY",
                     current: true
                 },
