@@ -12,6 +12,7 @@ inputs:
   website-repository:
     description: "The Spring Website GitHub repo from which to checkout documentation files"
     required: false
+    default: ''
   is-antora:
     description: "Whether the reference documentation is Antora-based; defaults to true"
     default: "true"
@@ -26,21 +27,18 @@ inputs:
   version:
     description: "The current GA version; will read gradle.properties or pom.xml if not provided"
     required: false
+    default: ''
 
 runs:
   using: 'composite'
   steps:
     - uses: actions/checkout@v5
-    - uses: spring-io/spring-gradle-build-action@v2
-    - name: Build Project
+    - name: Install Dependencies
       shell: bash
-      run: ./gradlew -Dorg.gradle.welcome=never --no-daemon bootJar
-    - name: Stage jar for action B
-      shell: bash
-      run: |
-        cp build/libs/learn-page-update-action.jar src/main/actions/update-documentation-file/app.jar
+      run: npm install
     - name: Compute Spring Website Content Repository
       id: compute-repo
+      if: ${{ inputs.website-repository == '' }}
       uses: ./src/main/actions/switch-on-commercial
       with:
         if-oss: spring-io/spring-website-content
@@ -58,6 +56,10 @@ runs:
       uses: ./src/main/actions/compute-slug
       with:
         project-name: ${{ inputs.project-name || github.repository }}
+    - name: Compute Version
+      id: compute-version
+      if: ${{ inputs.version == '' }}
+      uses: ./src/main/actions/compute-version
     - name: Update Documentation File
       uses: ./src/main/actions/update-documentation-file
       with:
@@ -65,7 +67,7 @@ runs:
         project-slug: ${{ steps.documentation-slug.outputs.slug }}
         version: ${{ inputs.version || steps.compute-version.outputs.version }}
         api-doc-url: ${{ inputs.api-doc-url }}
-        ref-doc-url: ${{ inputs.reference-doc-url }}
+        ref-doc-url: ${{ inputs.ref-doc-url }}
         is-antora: ${{ inputs.is-antora }}
     - name: Commit documentation updates
       uses: stefanzweifel/git-auto-commit-action@v7

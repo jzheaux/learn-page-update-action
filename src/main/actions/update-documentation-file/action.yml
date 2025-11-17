@@ -28,11 +28,5 @@ inputs:
     required: false
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - --releases.project.slug=${{ inputs.project-slug }}
-    - --releases.project.version=${{ inputs.version }}
-    - --releases.project.apidoc.url=${{ inputs.api-doc-url }}
-    - --releases.project.refdoc.url=${{ inputs.ref-doc-url }}
-    - --releases.project.refdoc.antora=${{ inputs.is-antora }}
+  using: 'node20'
+  main: '../../javascript/index.js'
